@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: wazuh-daemonset
+  namespace: default
+  labels:
+    k8s-app: wazuh-daemonset
+spec:
+  selector:
+    matchLabels:
+      name: wazuh-daemonset
+  template:
+    metadata:
+      labels:
+        name: wazuh-daemonset
+    spec:
+      tolerations:
+      # this toleration is to have the daemonset runnable on master nodes
+      # remove it if your masters can't run pods
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: wazuh-daemonset
+        image: selise.azurecr.io/wazuh-daemonset:0.1
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: docker
+          mountPath: /var/run/docker.sock
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+      terminationGracePeriodSeconds: 5
+      volumes:
+      - name: varlibdockercontainers
+        #hostPath:
+        nfs:
+          server: 10.5.25.19
+          path: /nfs/dev/containerlogs/wazuh
+      - name: docker
+        #hostPath:
+        #path: /var/run/docker.sock
+        nfs:
+          server: 10.5.25.19
+          #path: /nfs/dev/containerlogs/wazuh/docker.sock
+          path: /nfs/dev/containerlogs/wazuh/
