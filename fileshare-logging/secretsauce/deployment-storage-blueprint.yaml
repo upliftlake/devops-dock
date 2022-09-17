@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-azurestorage-test
+  namespace: dev-secretsauce
+spec:  
+  selector:
+      matchLabels:
+        app: azuretest
+  template:
+    metadata:
+      labels:
+        app: azuretest
+    spec:
+      containers:
+      - name: azuretest
+        image: mcr.microsoft.com/oss/nginx/nginx:1.15.5-alpine
+        #image: your-registry.azurecr.io/demoapp:latest
+        volumeMounts:
+        - name: azurefileshare
+          mountPath: /myawesomefileshare
+          #mountPath: /containerlogs
+      imagePullSecrets:
+      - name: your-pull-secret-if-you-have-one       
+      volumes:
+      - name: azurefileshare
+        azureFile:
+          secretName: storage-secret
+          shareName: containerlogs/secretsauce
+          readOnly: false

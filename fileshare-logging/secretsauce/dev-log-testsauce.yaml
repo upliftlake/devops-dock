@@ -1,0 +1,95 @@
+# this is a example deployment for fileshare logging
+
+# Source: dev-log-testsauce/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-log-testsauce
+  namespace: dev-secretsauce
+  labels:
+    run: dev-log-testsauce
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+  selector:
+    run: dev-log-testsauce
+---
+# Source: dev-log-testsauce/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: dev-log-testsauce
+  name: dev-log-testsauce
+  namespace: dev-secretsauce
+spec:
+  selector:
+    matchLabels:
+      run: dev-log-testsauce
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: dev-log-testsauce
+    spec:
+      containers:
+        - name: dev-log-testsauce
+          image: yourregistryname.com/dev-log-testsauce:86075
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /app/keys/public-key
+              name: pub-key
+            - mountPath: /app/logg
+              name: kube-logs
+              readOnly: false
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: dev-az
+          resources:
+            limits:
+              cpu: 400m
+              memory: 1200Mi
+            requests:
+              cpu: 40m
+              memory: 80Mi
+      imagePullSecrets:
+        - name : azurecr-secret
+      volumes:
+        - name: pub-key
+          azureFile:
+            # storage-secret name referenced from the 'secret'
+            secretName: storage-secret
+            # containerlogs is the fileshare name
+            shareName: containerlogs/dev/env/keys/public-key
+            # readonly maynot work always
+            readOnly: false
+        - name: kube-logs
+          azureFile:
+            secretName: storage-secret
+            shareName: containerlogs/dev/containerlogs/log-testsauce
+            readOnly: false
+---
+# Source: dev-log-testsauce/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: ingress-dev-log-testsauce
+  namespace: dev-secretsauce
+spec:
+  rules:
+    - host: services.local.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: dev-log-testsauce
+                port:
+                  number: 80
+            path: /api/log-testsauce(/|$)(.*)
+            pathType: ImplementationSpecific
