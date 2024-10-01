@@ -19,3 +19,4 @@ The idea is to send notification from ArgoCD to a Microsoft Teams Channel whenev
 ## Refer to these docs for further references
 1. https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/teams/ note: the notification will not work without using templates and triggers
 2. https://github.com/argoproj/argo-cd/blob/master/notifications_catalog/install.yaml
+3. https://www.linkedin.com/pulse/add-teams-argocd-notifications-never-easier-your-dev-team-halvarsson
