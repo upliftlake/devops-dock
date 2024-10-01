@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.teams: |
+    recipientUrls: 
+      ArgoDeployChannel: $channel-teams-url
+  #`context: |
+  #  argocdUrl: https://20.204.207.96
+  trigger.on-health-degraded: |
+    - description: Application has degraded
+      when: app.status.health.status == 'Degraded'
+      send: [app-on-health-degraded]
+  trigger.on-deployed: |
+    - description: Application is synced and healthy. Triggered once per commit.
+      when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+      oncePer: app.status.sync.revision
+      send: [app-sync-succeeded]
+  template.app-on-health-degraded: |
+      message: |
+          {{if eq .serviceType "slack"}}:exclamation:{{end}} Application {{.app.metadata.name}} has degraded.
+      email:
+          subject: Application {{.app.metadata.name}} has degraded.
+      teams:
+          themeColor: "#FF0000"
+          title: Application {{.app.metadata.name}} has degraded.
+          facts: |
+              [{
+                "name": "Health Status",
+                "value": "{{.app.status.health.status}}"
+              }
+              {{range $index, $c := .app.status.conditions}}
+                {{if not $index}},{{end}}
+                {{if $index}},{{end}}
+                {
+                  "name": "{{$c.type}}",
+                  "value": "{{$c.message}}"
+                }
+              {{end}}
+              ]
+          potentialAction: |
+              [{
+                "@type":"OpenUri",
+                "name":"Open Application",
+                "targets":[{
+                  "os":"default",
+                  "uri":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+                }]
+              },
+              {
+                "@type":"OpenUri",
+                "name":"Open Repository",
+                "targets":[{
+                  "os":"default",
+                  "uri":"{{.app.spec.source.repoURL | call .repo.RepoURLToHTTPS}}"
+                }]
+              }]
+  template.app-sync-succeeded: |
+      message: |
+          {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} has been successfully synced at {{.app.status.operationState.finishedAt}}.
+      email:
+          subject: Application {{.app.metadata.name}} has been successfully synced.    
+      teams:
+          themeColor: "#000080"
+          title: Application {{.app.metadata.name}} has been successfully synced
+          facts: |
+              [{
+                "name": "Sync Status",
+                "value": "{{.app.status.sync.status}}"
+              },
+              {
+                "name": "Synced at",
+                "value": "{{.app.status.operationState.finishedAt}}"
+              }
+              {{range $index, $c := .app.status.conditions}}
+                {{if not $index}},{{end}}
+                {{if $index}},{{end}}
+                {
+                  "name": "{{$c.type}}",
+                  "value": "{{$c.message}}"
+                }
+              {{end}}
+              ]
+          potentialAction: |
+              [{
+                "@type":"OpenUri",
+                "name":"Operation Details",
+                "targets":[{
+                  "os":"default",
+                  "uri":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
+                }]
+              },
+              {
+                "@type":"OpenUri",
+                "name":"Open Repository",
+                "targets":[{
+                  "os":"default",
+                  "uri":"{{.app.spec.source.repoURL | call .repo.RepoURLToHTTPS}}"
+                }]
+              }]
