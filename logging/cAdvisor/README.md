@@ -17,3 +17,7 @@ docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:ro --volume=/sys:/sy
 panel1-14282
 panel2-19792 (only for docker compose)
 ```
+
+## for further reading
+https://github.com/google/cadvisor
+https://medium.com/@varunjain2108/monitoring-docker-containers-with-cadvisor-prometheus-and-grafana-d101b4dbbc84
