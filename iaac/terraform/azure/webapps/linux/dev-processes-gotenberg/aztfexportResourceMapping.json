@@ -1,0 +1,7 @@
+{
+	"/subscriptions/6b284c13-deae-4ba4-a188-36192eb6f2ef/resourceGroups/rg-devops-rnd/providers/Microsoft.Web/sites/dev-processes-gotenberg": {
+		"resource_id": "/subscriptions/6b284c13-deae-4ba4-a188-36192eb6f2ef/resourceGroups/rg-devops-rnd/providers/Microsoft.Web/sites/dev-processes-gotenberg",
+		"resource_type": "azurerm_linux_web_app",
+		"resource_name": "res-0"
+	}
+}
