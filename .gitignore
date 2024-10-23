@@ -2,4 +2,4 @@
 ##############################
 secrets.auto.tfvars
 *.tfstate*
-.terraform/
+**/.terraform/
