@@ -1,6 +1,6 @@
 variable "serviceplansize" {
   type    = string
-  default = "dev_dv2m3o5"  # Fixed value
+  default = "dev_dv2m3o5"
 }
 
 data "azurerm_resource_group" "rg-devops-rnd" {
@@ -33,7 +33,6 @@ resource "azurerm_linux_web_app" "webapp" {
 
   app_settings = {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE = var.app_settings.ENABLE_APP_SERVICE_STORAGE
-    #DD_API_KEY                          = local.merged_app_settings["DD_API_KEY"]
     DD_API_KEY                          = var.app_settings_secret.DD_API_KEY     
     DD_LOGS_ENABLED                     = var.app_settings.DD_LOGS_ENABLED         
     DD_LOGS_INJECTION                   = var.app_settings.DD_LOGS_INJECTION 

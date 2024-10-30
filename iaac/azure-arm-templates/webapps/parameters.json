@@ -1,0 +1,12 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_attempt_webapp_rolldice_name": {
+            "value": null
+        },
+        "serverfarms_attempt_asp_rolldice_externalid": {
+            "value": null
+        }
+    }
+}
