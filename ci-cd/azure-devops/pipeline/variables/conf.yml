@@ -1,0 +1,9 @@
+variables:
+  VERSIONING: true
+  AGENT_POOL_DEV: "devPool"
+  AGENT_POOL_CLOUD: "cloudPool"
+  CONTAINER_REGISTRY_URL: registry.azurecr.io
+  CONTAINER_REGISTRY_SC: dockerRegistryServiceConnection
+  CONTAINER_REGISTRY_PROJECT_URL: acr.azurecr.io
+  CONTAINER_REGISTRY_PROJECT_SC: dockerRegistrySC
+  VM_IMAGE: "ubuntu-latest"

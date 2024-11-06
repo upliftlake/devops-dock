@@ -1,0 +1,16 @@
+variables:
+  SERVICE_NAME: business-dinosaur
+  ICON_NAME: $(SERVICE_NAME)
+  CONTAINER_TAG: $(Build.BuildId)
+  NAMESPACE: $(SERVICE_NAME)
+  CONTAINER_NAME: $(SERVICE_NAME)
+  DOCKER_FILE: Dockerfile
+  WIN_CONTAINER_NAME: $(SERVICE_NAME)-win
+  WIN_DOCKER_FILE: win.Dockerfile
+  KAFKA_DOCKER_FILE: kafka.Dockerfile
+  KAFKA_CONTAINER_NAME: $(SERVICE_NAME)-host-kafka
+  HIGHPRIORITY_WIN_CONTAINER_NAME: $(SERVICE_NAME)-host-highpriority
+  HIGHPRIORITY_WIN_DOCKER_FILE: host.HighPriority.Dockerfile
+  JOB_CONTAINER_NAME: $(SERVICE_NAME)-job
+  JOB_DOCKER_FILE: job.Dockerfile
+  helmVersion: latest

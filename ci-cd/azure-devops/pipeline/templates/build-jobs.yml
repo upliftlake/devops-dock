@@ -1,0 +1,12 @@
+jobs:
+- job: BuildWebService
+  displayName: Build Web Service
+  pool:
+    vmImage: $(VM_IMAGE)
+
+  variables:
+    containerName: $(CONTAINER_NAME)
+    dockerFile: $(DOCKER_FILE)
+
+  steps:
+  - template: /pipeline/templates/build-steps.yml

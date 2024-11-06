@@ -1,0 +1,11 @@
+jobs:
+- deployment: Deploy
+  displayName: Deploy
+  pool:
+    vmImage: 'ubuntu-latest'
+  environment: 'Dev.dev-business-dinosaur'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - template: /pipeline/templates/deploy-steps.yml

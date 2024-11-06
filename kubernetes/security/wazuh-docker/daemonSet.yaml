@@ -21,7 +21,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: wazuh-daemonset
-        image: selise.azurecr.io/wazuh-daemonset:0.1
+        image: acr.azurecr.io/wazuh-daemonset:0.1
         resources:
           limits:
             memory: 200Mi

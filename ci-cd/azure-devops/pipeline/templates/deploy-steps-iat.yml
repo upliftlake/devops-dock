@@ -1,0 +1,155 @@
+steps:
+
+- task: Docker@2
+  displayName: 'Pull WebAPI image'
+  inputs:
+    containerRegistry: $(CONTAINER_REGISTRY_SC)
+    command: pull
+    arguments: $(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(CONTAINER_NAME):$(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: 'Pull Background Service image'
+  inputs:
+    containerRegistry: $(CONTAINER_REGISTRY_SC)
+    command: pull
+    arguments: $(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(WIN_CONTAINER_NAME):$(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: 'Pull High Priority Background Service image'
+  inputs:
+    containerRegistry: $(CONTAINER_REGISTRY_SC)
+    command: pull
+    arguments: $(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(HIGHPRIORITY_WIN_CONTAINER_NAME):$(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: 'Pull Scheduler Service image'
+  inputs:
+    containerRegistry: $(CONTAINER_REGISTRY_SC)
+    command: pull
+    arguments: $(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(JOB_CONTAINER_NAME):$(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: 'Promote WebAPI to Production'
+  inputs:
+    command: tag
+    arguments: '$(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(CONTAINER_NAME):$(CONTAINER_TAG) $(CONTAINER_REGISTRY_PROJECT_URL)/$(iatRepoEnv)-$(CONTAINER_NAME):$(CONTAINER_TAG)'
+
+- task: Docker@2
+  displayName: 'Promote Background Service to Production'
+  inputs:
+    command: tag
+    arguments: '$(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(WIN_CONTAINER_NAME):$(CONTAINER_TAG) $(CONTAINER_REGISTRY_PROJECT_URL)/$(iatRepoEnv)-$(WIN_CONTAINER_NAME):$(CONTAINER_TAG)'
+
+- task: Docker@2
+  displayName: 'Promote High Priority Background Service to Production'
+  inputs:
+    command: tag
+    arguments: '$(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(HIGHPRIORITY_WIN_CONTAINER_NAME):$(CONTAINER_TAG) $(CONTAINER_REGISTRY_PROJECT_URL)/$(iatRepoEnv)-$(HIGHPRIORITY_WIN_CONTAINER_NAME):$(CONTAINER_TAG)'
+
+
+- task: Docker@2
+  displayName: 'Promote Scheduler Service to Production'
+  inputs:
+    command: tag
+    arguments: '$(CONTAINER_REGISTRY_URL)/$(repoEnv)-$(JOB_CONTAINER_NAME):$(CONTAINER_TAG) $(CONTAINER_REGISTRY_PROJECT_URL)/$(iatRepoEnv)-$(JOB_CONTAINER_NAME):$(CONTAINER_TAG)'
+
+- task: Docker@2
+  displayName: Push Web Service Docker Image
+  inputs:
+    command: push
+    repository: $(iatRepoEnv)-$(CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Push Background Service Docker Image
+  inputs:
+    command: push
+    repository: $(iatRepoEnv)-$(WIN_CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Push High Priority Background Service Docker Image
+  inputs:
+    command: push
+    repository: $(iatRepoEnv)-$(HIGHPRIORITY_WIN_CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+  
+- task: Docker@2
+  displayName: Push Scheduler Service Docker Image
+  inputs:
+    command: push
+    repository: $(iatRepoEnv)-$(JOB_CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-api-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract Web API helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Web API
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-api
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-api/envs/iat/values.yaml
+    namespace: iat
+    releaseName: release-webapi
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-background-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract Background Service helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Background Service
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-background
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-background/envs/iat/values.yaml
+    namespace: iat
+    releaseName: release-background-service
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-background-highpriority-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract High Priority Background Service helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy High Priority Background Service
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-background-highpriority
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-background-highpriority/envs/iat/values.yaml
+    namespace: iat
+    releaseName: release-highpriority-background-service
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-job-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract High Priority Background Service helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Scheduler Service
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-job
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-job/envs/iat/values.yaml
+    namespace: iat
+    releaseName: release-job-service
+
+- task: WorkItemUpdater@3
+  inputs:
+    workitemsSource: 'Build'
+    workItemType: 'Task,Bug,User Story'
+    workitemLimit: '200'
+    updateAssignedTo: 'Never'
+    addTags: 'InIAT'
+    removeTags: 'InPR'

@@ -1,0 +1,61 @@
+jobs:
+- job: UpdateDeployment
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+  - name: dinosaur_API
+    value: 'acr.azurecr.io/$(repoEnv)-business-dinosaur'
+  - name: dinosaur_WIN
+    value: 'acr.azurecr.io/$(repoEnv)-business-dinosaur-win'
+  - name: dinosaur_HOST
+    value: 'acr.azurecr.io/$(repoEnv)-business-dinosaur-host-highpriority'
+  - name: dinosaur_JOB
+    value: 'acr.azurecr.io/$(repoEnv)-business-dinosaur-job'
+  - name: dinosaur_KAFKA
+    value: 'acr.azurecr.io/$(repoEnv)-business-dinosaur-host-kafka'
+  
+  steps:
+  - checkout: project-kubernetes-dev
+    persistCredentials: true
+  - checkout: project-kubernetes-stg
+    persistCredentials: true
+  - checkout: project-kubernetes-iat
+    persistCredentials: true
+  
+  - script: |
+      ls
+      ls -l 
+      cd ./Project-Kubernetes-$(repoEnv)/
+      ls -l
+
+      git fetch
+      git checkout main
+      git pull origin main
+      sed -i "/image:/s~image:.*~image: $dinosaur_API:$(Build.BuildId)~" dinosaur-api/deployment.yaml
+      sed -i "/image:/s~image:.*~image: $dinosaur_WIN:$(Build.BuildId)~" dinosaur-win/deployment.yaml
+      sed -i "/image:/s~image:.*~image: $dinosaur_HOST:$(Build.BuildId)~" dinosaur-host/deployment.yaml
+      sed -i "/image:/s~image:.*~image: $dinosaur_JOB:$(Build.BuildId)~" dinosaur-job/deployment.yaml
+      sed -i "/image:/s~image:.*~image: $dinosaur_KAFKA:$(Build.BuildId)~" dinosaur-kafka/deployment.yaml
+      git config --global user.email "pipeline@project.ch"
+      git config --global user.name "Pipeline Automation"
+      git commit -am "Update image tag"
+      echo "This Is Build $(Build.BuildId)"
+      git status
+      git branch -a
+
+      cat dinosaur-api/deployment.yaml
+      cat dinosaur-win/deployment.yaml
+      cat dinosaur-host/deployment.yaml
+      cat dinosaur-job/deployment.yaml
+      cat dinosaur-kafka/deployment.yaml
+
+      git push origin
+  
+  - task: WorkItemUpdater@3
+    inputs:
+      workitemsSource: 'Build'
+      workItemType: 'Task,Bug,User Story'
+      workitemLimit: '200'
+      updateAssignedTo: 'Never'
+      addTags: $(workItemTag)
+      removeTags: 'InPR'

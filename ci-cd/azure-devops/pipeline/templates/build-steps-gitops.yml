@@ -1,0 +1,139 @@
+steps:
+
+- task: WorkItemUpdater@3
+  condition: not(startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
+  inputs:
+    workitemsSource: 'Build'
+    workItemType: 'Task,Bug,User Story'
+    workitemLimit: '200'
+    updateAssignedTo: 'Never'
+    addTags: 'InPR'
+
+- script: |
+    export DOCKER_BUILDKIT=1 
+  displayName: Enable Docker BuildKit
+
+- script: |
+    mkdir -p $(System.DefaultWorkingDirectory)/testresults
+  displayName: Create Directory for the Test Results
+
+- task: Docker@2
+  displayName: Build TestResults Docker Image
+  inputs:
+    command: build
+    repository: $(repoEnv)-$(CONTAINER_NAME)-testresults
+    dockerfile: $(DOCKER_FILE)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    arguments: "--target export --output $(System.DefaultWorkingDirectory)/testresults"
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test results'
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
+    searchFolder: '$(System.DefaultWorkingDirectory)/testresults'
+    publishRunAttachments: true
+    failTaskOnFailedTests: true
+
+- task: Docker@2
+  displayName: Build Web Service Docker Image
+  inputs:
+    command: build
+    repository: $(repoEnv)-$(CONTAINER_NAME)
+    dockerfile: $(DOCKER_FILE)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Build Background Service Docker Image
+  inputs:
+    command: build
+    repository: $(repoEnv)-$(WIN_CONTAINER_NAME)
+    dockerfile: $(WIN_DOCKER_FILE)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Build High Priority Background Service Docker Image
+  inputs:
+    command: build
+    repository: $(repoEnv)-$(HIGHPRIORITY_WIN_CONTAINER_NAME)
+    dockerfile: $(HIGHPRIORITY_WIN_DOCKER_FILE)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Build Job Service Docker Image
+  inputs:
+    command: build
+    repository: $(repoEnv)-$(JOB_CONTAINER_NAME)
+    dockerfile: $(JOB_DOCKER_FILE)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Build Host Kafka Service Docker Image
+  inputs:
+    command: build
+    repository: $(repoEnv)-$(KAFKA_CONTAINER_NAME)
+    dockerfile: $(KAFKA_DOCKER_FILE)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Push Web Service Docker Image
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')
+  inputs:
+    command: push
+    repository: $(repoEnv)-$(CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Push Background Service Docker Image
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')
+  inputs:
+    command: push
+    repository: $(repoEnv)-$(WIN_CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Push High Priority Background Service Docker Image
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')
+  inputs:
+    command: push
+    repository: $(repoEnv)-$(HIGHPRIORITY_WIN_CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Push Job Service Docker Image
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')
+  inputs:
+    command: push
+    repository: $(repoEnv)-$(JOB_CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+
+- task: Docker@2
+  displayName: Push Host Kafka Docker Image
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')
+  inputs:
+    command: push
+    repository: $(repoEnv)-$(KAFKA_CONTAINER_NAME)
+    containerRegistry: $(CONTAINER_REGISTRY_PROJECT_SC)
+    tags: |
+      $(CONTAINER_TAG)
+      

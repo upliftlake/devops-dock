@@ -1,0 +1,6 @@
+variables:
+  - name: chartVersion
+    ${{ if startsWith( variables['Build.SourceBranch'], 'refs/heads/release/v' ) }}:
+      value: $(Build.SourceBranchName)
+    ${{ if not( startsWith( variables['Build.SourceBranch'], 'refs/heads/release/v' ) ) }}:
+      value: v1.0.0

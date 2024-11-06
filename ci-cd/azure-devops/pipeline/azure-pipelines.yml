@@ -1,0 +1,107 @@
+trigger:
+  - main
+  - release/v*
+
+resources:
+  repositories:
+  - repository: self
+  - repository: Project-kubernetes-dev
+    type: git
+    name: Project-Essential/Project-Kubernetes-dev
+    ref: main
+  - repository: Project-kubernetes-stg
+    type: git
+    name: Project-Essential/Project-Kubernetes-stg
+    ref: main
+  - repository: Project-kubernetes-iat
+    type: git
+    name: Project-Essential/Project-Kubernetes-iat
+    ref: main
+
+
+variables:
+  - template: variables/vars.yaml
+  - template: variables/conf.yml
+  - template: variables/env.yml
+  - template: variables/chartVersion.yml
+
+stages:
+  - stage: Build
+    displayName: Build
+    jobs:
+      - template: /pipeline/templates/build-jobs.yml
+  
+  - stage: BuildDevStage
+    displayName: Build For Dev Stage
+    dependsOn: []
+    jobs:
+      - template: /pipeline/templates/build-jobs-gitops.yml
+  
+  - stage: DeployDev
+    displayName: Deploy To Dev
+    dependsOn: BuildDevStage
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables:
+      workItemTag: InDev
+    jobs:
+      - template: /pipeline/templates/trigger-deployment.yml
+
+  - stage: DeployStaging
+    displayName: Deploy To Staging
+    dependsOn: Build
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/v'))
+    jobs:
+    - deployment: DeployStaging
+      displayName: Deploy to Staging
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment: 'Project-Staging.stg-business-dinosaur'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - template: /pipeline/templates/deploy-steps-staging.yml
+        
+  - stage: DeployStage
+    displayName: Deploy To Stage
+    dependsOn: BuildDevStage
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/v'))
+    variables:
+      workItemTag: InStage
+    jobs:
+      - template: /pipeline/templates/trigger-deployment.yml
+    
+  - stage: DeployIAT
+    displayName: Deploy To IAT
+    dependsOn: DeployStaging
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/v'))
+    variables:
+      repoEnv: iat
+      workItemTag: InIAT
+    jobs:
+    - template: /pipeline/templates/tag-images-iat.yml
+      parameters:
+        name: TagImage
+        displayName: Tag Image For IAT
+    - template: /pipeline/templates/trigger-deployment.yml
+      parameters:
+        name: DeployImage
+        displayName: Deploy Image To IAT
+        dependsOn: TagImage
+        condition: and(dependencies.TagImage.result, 'Succeeded')
+
+  - stage: DeployProduction
+    displayName: Deploy To Production
+    dependsOn: DeployStaging
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/v'))
+    jobs:
+    - deployment: DeployProduction
+      displayName: Deploy to Production
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment: 'EHP-Production.prod'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - template: /pipeline/templates/deploy-steps-prod.yml

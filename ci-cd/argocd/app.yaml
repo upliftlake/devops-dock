@@ -9,9 +9,9 @@ metadata:
   #  notifications.argoproj.io/subscribe.on-sync-succeeded.teams: ArgoDevStgStatus #Teams Channel
   #  notifications.argoproj.io/subscribe.on-sync-failed.teams: ArgoDevStgStatus #Teams Channel
 spec:
-  project: ecohub-processes-dev
+  project: project-processes-dev
   source:
-    repoURL: https://EcoHub@dev.azure.com/EcoHub/EcoHub-Essential/_git/EcoHubProcess-Kubernetes-dev
+    repoURL: https://project@dev.azure.com/project/project-Essential/_git/projectProcess-Kubernetes-dev
     targetRevision: HEAD
     path: blocks-identity
   destination:

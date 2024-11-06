@@ -1,0 +1,66 @@
+steps:
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-api-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract Web API helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Web API
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-api
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-api/envs/staging/values.yaml
+    namespace: stg-business-dinosaur
+    releaseName: webapi
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-background-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract Background Service helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Background Service
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-background
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-background/envs/staging/values.yaml
+    namespace: stg-business-dinosaur
+    releaseName: background-service
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-background-highpriority-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract High Priority Background Service helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy High Priority Background Service
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-background-highpriority
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-background-highpriority/envs/staging/values.yaml
+    namespace: stg-business-dinosaur
+    releaseName: highpriority-background-service
+
+- script: tar xf $(Agent.BuildDirectory)/Packages/business-dinosaur-job-$(chartVersion).tgz -C $(Agent.BuildDirectory)/Packages
+  displayName: Extract High Priority Background Service helm package
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Scheduler Service
+  inputs:
+    command: upgrade
+    chartType: filepath
+    chartPath: $(Agent.BuildDirectory)/Packages/business-dinosaur-job
+    overrideValues: image.tag=$(CONTAINER_TAG)
+    valueFile: $(Agent.BuildDirectory)/Packages/business-dinosaur-job/envs/staging/values.yaml
+    namespace: stg-business-dinosaur
+    releaseName: job-service
+
+- task: WorkItemUpdater@3
+  inputs:
+    workitemsSource: 'Build'
+    workItemType: 'Task,Bug,User Story'
+    workitemLimit: '200'
+    updateAssignedTo: 'Never'
+    addTags: 'InStage'
+    removeTags: 'InPR'
