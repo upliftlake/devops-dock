@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.30.xsd
+      http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+<changeSet id="1" author="kristyl">
+	<ext:createCollection collectionName="kristyl_Collection">
+		<ext:options>
+		{
+		validator: {
+			$jsonSchema: {
+				bsonType: "object",
+				required: ["name", "address"],
+				properties: {
+					name: {
+					bsonType: "string",
+					description: "The Name"
+					},
+			address: {
+				bsonType: "string",
+				description: "The Address"
+						}
+					}
+				}
+			},
+			validationAction: "warn",
+			validationLevel: "strict"
+			}
+			</ext:options>
+		</ext:createCollection>
+	</changeSet>
+	<changeSet id="2" author="kristyl">
+        <ext:createIndex collectionName="createIndexTest">
+            <ext:keys>
+                { clientId: 1, type: 1}
+            </ext:keys>
+            <ext:options>
+                {unique: true, name: "ui_tppClientId"}
+            </ext:options>
+        </ext:createIndex>
+
+        <ext:createIndex collectionName="createIndexNoOptionsTest">
+            <ext:keys>
+                { clientId: 1, type: 1}
+            </ext:keys>
+			<ext:options>
+                {unique: true, name: "ui_tppClientIdNoOptions"}
+            </ext:options>
+        </ext:createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: crispycoffee
+      comment: create_db
+      changes:
+        - runCommand:
+            command: { buildInfo: 1 }
+          #  command: '{ "use": "attemptdb" }'

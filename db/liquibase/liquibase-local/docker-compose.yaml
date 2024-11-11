@@ -1,0 +1,12 @@
+version: '3.5'
+
+services:
+  mongodb_container:
+    image: mongo:latest
+    environment: 
+      MONGO_INITDB_DATABASE: kristyldb
+    ports:
+      - 27017:27017
+    volumes:
+      - "./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js"
+            

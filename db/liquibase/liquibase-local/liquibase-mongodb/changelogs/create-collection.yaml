@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: crispycoffee
+      comment: create_collection_comment
+      changes:
+        - createCollection:
+            collectionName: attempt_collection_1

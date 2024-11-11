@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: blocks-identity
+  name: identity
   namespace: argocd
   annotations:
     notifications.argoproj.io/subscribe.on-deployed.teams: ArgoDevStgStatus
@@ -9,7 +9,7 @@ metadata:
   #  notifications.argoproj.io/subscribe.on-sync-succeeded.teams: ArgoDevStgStatus #Teams Channel
   #  notifications.argoproj.io/subscribe.on-sync-failed.teams: ArgoDevStgStatus #Teams Channel
 spec:
-  project: project-processes-dev
+  project: project-dev
   source:
     repoURL: https://project@dev.azure.com/project/project-Essential/_git/projectProcess-Kubernetes-dev
     targetRevision: HEAD

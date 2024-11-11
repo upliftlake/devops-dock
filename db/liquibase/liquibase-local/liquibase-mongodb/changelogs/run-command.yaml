@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: crispycoffee
+      comment: run_command_comment
+      changes:
+        - runCommand:
+            command: |
+              {
+                collStats: "attempt_collection_1"
+              }
+        - rollback:
