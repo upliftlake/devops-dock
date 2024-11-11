@@ -1,0 +1,34 @@
+# external redirection from kubernetes
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: prod-crispycoffee-redirection
+  namespace: prod
+spec:
+  type: ExternalName
+  externalName: mysite-crispycoffee.mysite.com
+---
+apiVersion: networking.k8s.io/v1 
+kind: Ingress
+metadata:
+  name: prod-crispycoffee-redirection
+  namespace: prod
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    #  nginx.ingress.kubernetes.io/rewrite-target: /[BUCKET_NAME]/[BUILD_SHA]
+    #  inginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/upstream-vhost: "mysite-crispycoffee.mysite.com"
+spec:
+  rules:
+  - host: mysite.com
+    http:
+      paths:
+      - path: /api/crispycoffee(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: prod-crispycoffee-redirection
+            port:
+              number: 80
