@@ -11,10 +11,10 @@ MONGO_URI="mongodb+srv://user:pass@project-mongo-env.afhdjaf.mongodb.net/$DB_NAM
 mongosh "$MONGO_URI" --quiet --eval "
   db.getCollection('$COLLECTION_NAME').deleteMany({
     \$nor: [
-      { key: '6997829C--AADA' },
-      { key: '6886829C--AADA' }
+      { key: '4447829C--AADA' },
+      { key: '5556829C--AADA' }
     ]
   });
 "
 
-echo "Deletion complete: All documents except those with 'key:6997829C--AADA' and 'key:6886829C--AADA' have been removed from '$COLLECTION_NAME'."
+echo "Deletion complete: All documents except those with 'key:4447829C--AADA' and 'key:5556829C--AADA' have been removed from '$COLLECTION_NAME'."
