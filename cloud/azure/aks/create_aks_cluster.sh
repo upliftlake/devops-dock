@@ -1,10 +1,10 @@
 Resource_Group_Name="rg-crispycoffee-cloud"
-Azure_Location="switzerlandnorth"
+Azure_Location="estonia"
 
 Vnet_Name="vnet-dev-crispycoffee"
 Subnet_Name="snet-dev-aks"
 Aks_Name="aks-dev"
-Subnet_Id="/subscriptions/42240cc0-a4df-4c5d-ad6d-6733fa2d1d78/resourceGroups/rg-crispycoffee-cloud/providers/Microsoft.Network/virtualNetworks/vnet-dev-crispycoffee/subnets/snet-dev-aks"
+Subnet_Id="/subscriptions/<asl;djfa;ldfjalskdfj>/resourceGroups/rg-crispycoffee-cloud/providers/Microsoft.Network/virtualNetworks/vnet-dev-crispycoffee/subnets/snet-dev-aks"
 K8s_Version="1.27.7"
 Node_Count=2
 Vm_Size="Standard_B4ms"

@@ -20,7 +20,7 @@ storageAccountName="storage-crispycoffee"
 storageContainerName="container-crispycoffee"
 
 #Provide the key of the storage account where you want to copy snapshot.
-storageAccountKey="5MZOFm6pkrnYlewayhuhrfoaiuhf987u72314y645981767y498i7jnxbzkwR3rzA2YWmd1I1+ASt0Iq6rw=="
+storageAccountKey="<storage-account-key>"
 
 #Provide the name of the VHD file to which snapshot will be copied.
 destinationVHDFileName="ss-crispycoffee-071122-vhd.vhd"
