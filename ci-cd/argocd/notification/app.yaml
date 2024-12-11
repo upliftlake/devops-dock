@@ -11,9 +11,9 @@ metadata:
 spec:
   project: project-dev
   source:
-    repoURL: https://project@dev.azure.com/project/project-Essential/_git/projectProcess-Kubernetes-dev
+    repoURL: <repo-URL>
     targetRevision: HEAD
-    path: blocks-identity
+    path: my-path
   destination:
     server: https://kubernetes.default.svc
     namespace: dev
